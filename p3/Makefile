@@ -3,16 +3,21 @@
 all: clean create_cluster install
 
 create_cluster:
-	k3d cluster create p3 --port 8888:8888@loadbalancer
+	k3d cluster create p3 -p 8443:443@loadbalancer -p 8888:8888@loadbalancer
 	k3d kubeconfig get p3
 
 install:
 	kubectl apply -R -f ./config/
 	kubectl get namespaces
 	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-#kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+	kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+	kubectl -n argocd rollout status deployment argocd-server
 	kubectl get pods -n argocd
 	kubectl apply -f ./app/my-app-argocd.yaml
+
+password:
+	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
+
 
 clean:
 	k3d cluster delete p3
