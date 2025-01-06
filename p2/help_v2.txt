@@ -1,0 +1,41 @@
+
+# Delete the existing cluster and enable the ingress
+minikube delete
+minikube addons enable ingress
+
+# Setup the applications in a Kubernetes cluster 
+minikube start --driver docker --static-ip 192.168.56.110
+
+# Verify the cluster
+kubectl config get-contexts  
+
+# Create the namespace
+kubectl apply -f namespace-app.yaml
+
+# Apply the ConfigMaps
+kubectl apply -f configmap/configmap-app1.yaml
+kubectl apply -f configmap/configmap-app2.yaml
+kubectl apply -f configmap/configmap-app3.yaml
+
+# Deploy the applications
+kubectl apply -f deployment/deployment-app1.yaml
+kubectl apply -f deployment/deployment-app2.yaml
+kubectl apply -f deployment/deployment-app3.yaml
+
+# Create the services
+kubectl apply -f service/service-app1.yaml
+kubectl apply -f service/service-app2.yaml
+kubectl apply -f service/service-app3.yaml
+
+# Configure the ingress
+kubectl apply -f ingress/ingress-app.yaml
+
+# Verify the setup
+kubectl get all -n apps
+
+#Modify ect host iof necessary
+
+curl http://192.168.56.110
+curl http://app1.com 
+curl http://app2.com
+curl http://app3.com
