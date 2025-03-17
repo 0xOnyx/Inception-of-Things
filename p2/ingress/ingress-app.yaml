@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: app-ingress
   namespace: apps
-  annotations:
-    traefik.ingress.kubernetes.io/access-log: "true"
 spec:
   rules:
     - host: app1.com
@@ -27,7 +25,8 @@ spec:
                 name: app2-service
                 port:
                   number: 80
-    - http:
+    - host: app3.com
+      http:
         paths:
           - path: /
             pathType: Prefix

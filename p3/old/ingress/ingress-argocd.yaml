@@ -9,6 +9,7 @@ metadata:
   annotations:
     ingress.kubernetes.io/ssl-redirect: "false"
     kubernetes.io/ingress.class: traefik
+
 spec:
   rules:
     - http:

@@ -1,13 +1,41 @@
+### Uninstall
+sudo /usr/local/bin/k3s-uninstall.sh
+sudo rm -f $(which kubectl) 
 
-# Delete the existing cluster and enable the ingress
-minikube delete
-minikube addons enable ingress
+### INSTALATION ###
+# Install K3s
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-ip=192.168.56.110" sh -
 
-# Setup the applications in a Kubernetes cluster 
-minikube start --driver docker --static-ip 192.168.56.110
+# Insatll kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# let kubectl to use k3s
+sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+# Add the IP address to the eth0 interface
+sudo ip addr add 192.168.56.110/24 dev eth0
+###
+
+
+# Check K3s status
+# sudo systemctl status k3s
+
+# Verify k3s is running
+kubectl get nodes
+
+# Verify the Kubernetes API server is running
+kubectl cluster-info
 
 # Verify the cluster
 kubectl config get-contexts  
+
+# CLEAR THE CLUSTER
+# kubectl delete all --all -A
+# kubectl delete configmap --all -A
+# kubectl delete ingress --all -A
+# kubectl delete namespace apps
 
 # Create the namespace
 kubectl apply -f namespace-app.yaml
@@ -33,8 +61,14 @@ kubectl apply -f ingress/ingress-app.yaml
 # Verify the setup
 kubectl get all -n apps
 
+#verify the ingress
+kubectl get ingress -n apps
+
+#
+kubectl get nodes -o wide  
+
 # Modify /ect/host if necessary
-echo -e "192.168.56.110 app1.com\n192.168.56.110 app2.com\n192.168.56.110 app3.com" | sudo tee -a /etc/hosts
+echo -e "\n192.168.56.110 app1.com\n192.168.56.110 app2.com\n192.168.56.110 app3.com" | sudo tee -a /etc/hosts
 
 curl http://192.168.56.110
 curl http://app1.com 
