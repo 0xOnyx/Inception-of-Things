@@ -1,0 +1,17 @@
+make clean
+make install_kubectl
+make create_cluster
+
+make install_gitlab
+make expose_gitlab
+make password aand log in gitlab, username is root
+create a repo name argocd-demo 
+add file as in https://github.com/0xOnyx/argocd-demo
+create an access token
+Add the access token to gitlab-cred-secret.yaml
+
+make install_argocd
+make expose_argocd
+make password and log in argocd, username is admin
+
+curl 127.0.0.1:8888

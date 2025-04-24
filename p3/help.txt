@@ -1,0 +1,8 @@
+make all
+expose_argocd
+
+admin is the default username in argocd
+to get the password, use make password
+
+then, check that will docker is here with
+curl 127.0.0.1:8888
