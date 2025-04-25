@@ -2,6 +2,9 @@
 
 all: clean create_cluster install
 
+clean:
+	k3d cluster delete p3
+
 create_cluster:
 	k3d cluster create p3 -p 8443:443@loadbalancer -p 8888:8888@loadbalancer
 	k3d kubeconfig get p3
@@ -15,26 +18,25 @@ install:
 	kubectl get pods -n argocd
 	kubectl apply -f ./app/my-app-argocd.yaml
 
+
+
 password:
-	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
+	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-
-clean:
-	k3d cluster delete p3
-
-show_app_in_argocd:
-	argocd login localhost:8080
-	argocd proj list
-	argocd app list
+expose_argocd:
+	kubectl port-forward svc/argocd-server -n argocd 8081:80
 
 
 verify:
 	kubectl get pods -n dev
-	curl http://localhost:8888
+	curl loc:8888
 
+	
+# show_app_in_argocd:
+# 	argocd login localhost:8080
+# 	argocd proj list
+# 	argocd app list
 
-expose_argocd:
-	kubectl port-forward svc/argocd-server -n argocd 8081:80
 
 #create_app:
 #	argocd login localhost:8080

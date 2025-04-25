@@ -1,0 +1,27 @@
+
+### Vagrant Help File
+
+# Start the virtual machines
+vagrant up
+
+# SSH into the server node
+vagrant ssh k3s-server
+
+# SSH into the agent node
+vagrant ssh k3s-agent
+
+# Stop all virtual machines
+vagrant halt
+
+# Restart all virtual machines
+vagrant reload
+
+# Destroy all virtual machines
+vagrant destroy
+
+# Verify Kubernetes cluster from the server node
+kubectl get nodes
+
+# Note:
+# Ensure the 'config/token' file exists before running the setup.
+# Run these commands from the directory containing the Vagrantfile.

@@ -6,7 +6,7 @@ metadata:
 spec:
   description: "My Argo CD Project"
   sourceRepos:
-    - https://github.com/0xOnyx/*
+    - "http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/*"
   destinations:
     - namespace: dev # On le cree
       server: https://kubernetes.default.svc
@@ -28,7 +28,7 @@ metadata:
 spec:
   project: my-project # this app appartient au projet juste en haut
   source:
-    repoURL: https://github.com/0xOnyx/argocd-demo
+    repoURL: "http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/argocd-demo.git"
     targetRevision: HEAD
     path: ./
   destination:
