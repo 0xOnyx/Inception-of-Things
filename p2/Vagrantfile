@@ -1,0 +1,84 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    config.vm.box = "ubuntu/bionic64"
+  
+    config.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+    SHELL
+  
+    config.vm.define "jerdos-sS"
+    config.vm.hostname = "jerdos-sS"
+    config.vm.network "private_network", ip: "192.168.56.110"
+    
+    # Copie des fichiers de configuration nécessaires
+    config.vm.provision "file", source: "token", destination: "/tmp/token"
+    
+    # Copie des fichiers de configuration pour chaque application
+    config.vm.provision "file", source: "configmap/", destination: "/tmp/configmap/"
+    config.vm.provision "file", source: "deployment/", destination: "/tmp/deployment/"
+    config.vm.provision "file", source: "service/", destination: "/tmp/service/"
+    config.vm.provision "file", source: "ingress/", destination: "/tmp/ingress/"
+    
+    config.vm.provider "virtualbox" do |v|
+      v.name = "jerdos-sS"
+      v.memory = 2024
+      v.cpus = 3
+    end
+
+    # Installation de k3s et kubectl
+    config.vm.provision "shell", inline: <<-SHELL
+      # Add current node in /etc/hosts
+      echo "127.0.1.1 $(hostname)" >> /etc/hosts
+
+      # Installation de k3s avec version spécifique
+      echo "Installing k3s "
+	  curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-ip=192.168.56.110" sh -
+
+
+      mkdir -p /home/vagrant/
+
+      # Déplacer les fichiers dans le répertoire de l'utilisateur
+      cp -r /tmp/configmap/* /home/vagrant/
+      cp -r /tmp/deployment/* /home/vagrant/
+      cp -r /tmp/service/* /home/vagrant/
+      cp -r /tmp/ingress/* /home/vagrant/
+
+      rm -rf /tmp/configmap/*
+      rm -rf /tmp/deployment/*
+      rm -rf /tmp/service/*
+      rm -rf /tmp/ingress/*
+      # Création des ConfigMaps
+      kubectl apply -f /home/vagrant/configmap/configmap-app1.yaml
+      kubectl apply -f /home/vagrant/configmap/configmap-app2.yaml
+      kubectl apply -f /home/vagrant/configmap/configmap-app3.yaml
+      
+      # Application des configurations
+      kubectl apply -f /home/vagrant/deployment/deployment-app1.yaml
+      kubectl apply -f /home/vagrant/deployment/deployment-app2.yaml
+      kubectl apply -f /home/vagrant/deployment/deployment-app3.yaml
+
+      kubectl apply -f /home/vagrant/service/service-app1.yaml
+      kubectl apply -f /home/vagrant/service/service-app2.yaml
+      kubectl apply -f /home/vagrant/service/service-app3.yaml
+
+      kubectl apply -f /home/vagrant/ingress/ingress-app.yaml
+      
+      # Ajout des entrées dans /etc/hosts
+      echo "192.168.56.110 app1.com" >> /etc/hosts
+      echo "192.168.56.110 app2.com" >> /etc/hosts
+      echo "192.168.56.110 app3.com" >> /etc/hosts
+      
+      # Attente pour le démarrage des services
+      sleep 30
+      
+      # Vérification de l'installation
+      kubectl get nodes
+      kubectl cluster-info
+      kubectl get all
+      kubectl get ingress
+    SHELL
+  
+  end
