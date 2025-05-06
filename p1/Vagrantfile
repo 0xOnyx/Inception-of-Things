@@ -3,15 +3,13 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #First machine (server)
     config.vm.define "jerdos-sS" do |server|
-        server.vm.box = "generic/ubuntu1810"
+        server.vm.box = "generic/debian10"
         server.vm.hostname = "jerdos-sS"
-        server.vm.network "private_network", ip: "192.168.56.110"
-        server.vm.provider "hyperv" do |hv|
-            hv.memory = "1024"
-            hv.cpus = 1
-            hv.vmname = "jerdos-s"
-            hv.enable_virtualization_extensions = true
-            hv.linked_clone = true
+        server.vm.network "public_network", ip: "192.168.56.110"
+        server.vm.provider "virtualbox" do |hv|
+            hv.memory = "2048"
+            hv.cpus = 2
+            hv.name = "jerdos-sS"
         end
         server.vm.provision "shell", inline: <<-SHELL
             sudo mkdir -p /opt/config
@@ -20,22 +18,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         server.vm.provision "file", source: "./config", destination: "/opt/config"
         server.vm.provision "shell", inline: <<-SHELL
             curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s - --token $(cat /opt/config/token) -write-kubeconfig-mode=644
+            curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s - --token $(cat /opt/config/token) --write-kubeconfig-mode 644
             sudo cp /usr/local/bin/kubectl /usr/bin/kubectl
         SHELL
     end
 
     #Second machine (agent)
     config.vm.define "jerdos-sSW" do |agent|
-        agent.vm.box = "generic/ubuntu1810"
+        agent.vm.box = "generic/debian10"
         agent.vm.hostname = "jerdos-sSW"
-        agent.vm.network "private_network", ip: "192.168.56.111"
-        agent.vm.provider "hyperv" do |hv|
-            hv.memory = "1024"
-            hv.cpus = 1
-            hv.vmname = "jerdos-sW"
-            hv.enable_virtualization_extensions = true
-            hv.linked_clone = true
+        agent.vm.network "public_network", ip: "192.168.56.111"
+        agent.vm.provider "virtualbox" do |hv|
+            hv.memory = "2048"
+            hv.cpus = 2
+            hv.name = "jerdos-sSW"
         end
         agent.vm.provision "shell", inline: <<-SHELL
             sudo mkdir -p /opt/config
